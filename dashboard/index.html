@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Token Radar &middot; model radar-2</p>
+    <h1>Which pre-token protocol is worth farming next?</h1>
+    <p class="lede">Every protocol below records no token yet. The radar ranks them by an
+    implied value built only from the snapshot's own figures — TVL, seven-day growth,
+    how long it has run with no token, and how many chains it runs on — and gives each
+    one a concrete farm plan with what it costs and how long it takes.</p>
+    <dl class="stats" id="stats"></dl>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls" aria-label="Filter the board">
+    <label class="ctl">Search
+      <input id="q" type="search" placeholder="Name or slug…" autocomplete="off">
+    </label>
+    <label class="ctl">Category
+      <select id="cat"><option value="all">All categories</option></select>
+    </label>
+    <label class="ctl">Chain
+      <select id="chain"><option value="all">All chains</option></select>
+    </label>
+    <label class="ctl check"><input id="watch" type="checkbox"> Watchlist only</label>
+    <div class="tabs" role="tablist" aria-label="Board">
+      <button id="tab-pre" role="tab" aria-selected="true">Pre-token board</button>
+      <button id="tab-live" role="tab" aria-selected="false">Already trading</button>
+    </div>
+  </section>
+
+  <p class="hint" id="hint"></p>
+
+  <section class="detail" id="detail" hidden aria-label="Protocol detail"></section>
+
+  <section class="board-wrap" aria-label="Ranked board">
+    <table id="board">
+      <thead>
+        <tr>
+          <th data-sort="rank" class="num sorted-desc">Rank</th>
+          <th data-sort="name">Protocol</th>
+          <th data-sort="category">Category</th>
+          <th>Chains</th>
+          <th data-sort="tvl_usd" class="num">TVL</th>
+          <th data-sort="change_7d" class="num">7d</th>
+          <th data-sort="age_days" class="num">Age</th>
+          <th data-sort="implied_value_usd" class="num">Implied value</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <table id="live" hidden>
+      <thead>
+        <tr>
+          <th>Protocol</th>
+          <th>Category</th>
+          <th>Chains</th>
+          <th class="num">TVL</th>
+          <th class="num">Market cap</th>
+          <th class="num">7d</th>
+        </tr>
+      </thead>
+      <tbody id="live-rows"></tbody>
+    </table>
+    <p class="count" id="count"></p>
+  </section>
+
+  <section class="method" aria-label="How the radar scores">
+    <h2>How the implied value is built</h2>
+    <p>One formula scores every protocol. Nothing is special-cased by name.</p>
+    <pre>base      = TVL &times; 0.30
+size      = clamp((100M / TVL) ^ 0.12, 0.55, 1.45)
+growth    = clamp(7d change, -80%, +200%); up &times; 0.55, down &times; 0.85
+maturity  = 0.55 + min(age, 1460d) / 1460 &times; 0.45   (unknown age: 180d)
+breadth   = 1 + 0.04 &times; min(chains - 1, 4)
+implied   = round(base &times; size &times; growth &times; maturity &times; breadth)</pre>
+    <ul>
+      <li><strong>Size:</strong> a small protocol's token would price off a higher multiple
+      than a giant's — fully diluted value compresses against TVL as a protocol matures.</li>
+      <li><strong>Growth:</strong> a falling TVL hurts more than a rising one helps.</li>
+      <li><strong>Maturity:</strong> four years running with no token earns the full
+      maturity factor; a young protocol earns less.</li>
+      <li><strong>Breadth:</strong> each extra chain adds reach, up to four.</li>
+    </ul>
+    <p class="fine">The snapshot is a sealed record from DefiLlama's public API, fetched once.
+    It is not proof: a protocol on this board <em>records</em> no token, which is not the
+    same as having none. Implied value is this radar's own claim about what a token
+    would be worth if the protocol's record stayed as it is — not a prediction of
+    whether or when a token is issued, and not financial advice.</p>
+  </section>
+</main>
+
+<footer class="wrap fine">
+  <p>Token Radar &middot; snapshot as of <span id="asof"></span> &middot; watchlist floor
+  $50,000,000 TVL &middot; all data is in this page, nothing is fetched from a network.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
